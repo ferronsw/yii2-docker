@@ -39,14 +39,14 @@ ARG PECL_MONGODB_INSTALL_SUFFIX
 ARG PECL_XDEBUG_INSTALL_SUFFIX
 
 # Install system packages
-RUN apk add --no-cache \
-        tzdata \
-        unzip \
-        curl \
-        icu-data-full \
-        icu-libs \
-        apache2
-
+RUN  apk add --no-cache \
+                bash \
+                unzip \
+                curl \
+                icu-data-full \
+                icu-libs \
+                tzdata
+                
 # Install common system packages for PHP extensions recommended for Yii 2.0 Framework
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
@@ -59,14 +59,15 @@ RUN install-php-extensions \
         pdo_mysql \
         pdo_pgsql \
         imagick \
-        mongodb${PECL_MONGODB_INSTALL_SUFFIX} \
-        xdebug${PECL_XDEBUG_INSTALL_SUFFIX}
+        intl
+        #mongodb${PECL_MONGODB_INSTALL_SUFFIX} \
+        #xdebug${PECL_XDEBUG_INSTALL_SUFFIX}
 
 # Add configuration files
 COPY image-files/dev/ /
 
 # Disable xdebug by default (see PHP_ENABLE_XDEBUG)
-RUN rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+#RUN rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Add GITHUB_API_TOKEN support for composer
 RUN chmod 755 \
@@ -77,11 +78,9 @@ RUN chmod 755 \
 RUN curl -sS https://getcomposer.org/installer | php -- \
         --filename=composer.phar \
         --install-dir=/usr/local/bin && \
-    mv /usr/local/bin/composer.phar /usr/local/bin/composer && \
-    composer clear-cache
+    mv /usr/local/bin/composer.phar /usr/local/bin/composer 
+#    composer clear-cache
 
 # Environment settings
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
     PHP_ENABLE_XDEBUG=0
-
-ENTRYPOINT ["apache2-foreground"]
